@@ -1,0 +1,29 @@
+{
+  "name": "moode-back",
+  "version": "1.0.0",
+  "description": "Backend part of an alternative moode audio UI.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/canuda10/moode-back.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/canuda10/moode-back/issues"
+  },
+  "homepage": "https://github.com/canuda10/moode-back#readme",
+  "devDependencies": {
+    "@types/ws": "^7.2.4",
+    "typescript": "^3.9.3"
+  },
+  "dependencies": {
+    "@types/node": "^14.0.5",
+    "ws": "^7.3.0"
+  }
+}
