@@ -20,6 +20,7 @@ export class MpdClient extends EventEmitter {
   private socket: net.Socket;
   private _volume: number;
   private _state: state_t;
+  private _songid: number;
 
   get state(): state_t {
     return this._state;
@@ -38,6 +39,7 @@ export class MpdClient extends EventEmitter {
 
     this._state = 'stop';
     this._volume = 0;
+    this._songid = 0;
   }
 
   private onConnect(): void {
@@ -84,6 +86,7 @@ export class MpdClient extends EventEmitter {
   }
 
   private processMsg(msg: string): void {
+    console.log(msg);
     const lines = msg.split('\n');
     lines.forEach(line => {
       const parts = line.split(':');
@@ -114,10 +117,25 @@ export class MpdClient extends EventEmitter {
             this.emit('volume');
           }
           break;
+
+        case 'songid':
+          let id = +val;
+          if (id != this._songid) {
+            this._songid = id;
+            this.currentsong();
+          }
       }
     });
   }
 
+  async currentsong(): Promise<void> {
+    this.socket.write('noidle\ncurrentsong\nidle\n');
+  }
+  // file: http://shoutcast.ccma.cat/ccma/catalunyaradioHD.mp3
+  // Name: CatRadio
+  // Pos: 0
+  // Id: 29
+  
   async idle(): Promise<void> {
     this.socket.write('idle\n');
   }
@@ -138,10 +156,29 @@ export class MpdClient extends EventEmitter {
     this.socket.write(`noidle\nsetvol ${volume}\nsetvol ${volume}\nidle\n`);
   }
 
+  async stats(): Promise<void> {
+    this.socket.write('noidle\nstate\nidle\n');
+  }
+
   async status(): Promise<void> {
     this.socket.write('noidle\nstatus\nidle\n');
   }
-
+  // volume: 50
+  // repeat: 0
+  // random: 0
+  // single: 0
+  // consume: 0
+  // playlist: 76
+  // playlistlength: 1
+  // mixrampdb: 0.000000
+  // state: play
+  // song: 0
+  // songid: 29
+  // time: 95:0
+  // elapsed: 94.598
+  // bitrate: 128
+  // audio: 44100:24:2
+  
   async stop(): Promise<void> {
     this.socket.write('noidle\nstop\nidle\n');
   }

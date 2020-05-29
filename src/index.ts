@@ -46,3 +46,5 @@ wss.on('connection', ws => {
   
   ws.on('ping', () => ws.pong());
 });
+
+console.log(`Server running.`);
