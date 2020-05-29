@@ -53,7 +53,7 @@ export class MpdClient extends EventEmitter {
     this.buffer += data;
     while (m = this.buffer.match(MPD_SENTINEL)) {
       // Data returned before an OK response.
-      const msg = this.buffer.substring(0, m.index);
+      const msg = this.buffer.slice(0, m.index);
       // Response end line, code and data.
       const [line, code, str] = m;
 
@@ -73,7 +73,7 @@ export class MpdClient extends EventEmitter {
       }
       // this.idle();
 
-      this.buffer = this.buffer.substring(msg.length + line.length + 1);
+      this.buffer = this.buffer.slice(msg.length + line.length + 1);
     }
   }
 
@@ -86,12 +86,12 @@ export class MpdClient extends EventEmitter {
   }
 
   private processMsg(msg: string): void {
-    console.log(msg);
+    // console.log(msg);
     const lines = msg.split('\n');
     lines.forEach(line => {
-      const parts = line.split(':');
-      const key = parts[0];
-      const val = parts[1] && parts[1].trim();
+      const idx = line.indexOf(':');
+      const key = line.slice(0, idx);
+      const val = line.slice(idx + 1).trim();
 
       switch (key) {
         case 'state':

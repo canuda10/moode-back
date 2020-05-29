@@ -7,18 +7,42 @@ interface MpdMessage {
   volume: number;
 }
 
+function broadcast(data: any): void {
+  wss.clients.forEach(ws => {
+    if (ws.readyState == WebSocket.OPEN)
+      ws.send(data);
+  });
+};
+
 const client = new MpdClient();
 const wss = new WebSocket.Server({ port: 3000 });
 
+const aliveSockets = new Set<WebSocket>();
+
+setInterval(() => {
+  wss.clients.forEach(ws => {
+    if (!aliveSockets.has(ws))
+      return ws.terminate();
+    
+    aliveSockets.delete(ws);
+    ws.ping();
+  })
+}, 30 * 1000);
+
+
+client.on('state', () => broadcast(JSON.stringify({ state: client.state })));
+client.on('volume', () => broadcast(JSON.stringify({ volume: client.volume })));
+
 wss.on('connection', ws => {
+  aliveSockets.add(ws);
   ws.send(JSON.stringify({ state: client.state }));
   ws.send(JSON.stringify({ volume: client.volume }));
 
-  client.on('state', () =>
-    ws.send(JSON.stringify({ state: client.state })));
+  // client.on('state', () =>
+  //   ws.send(JSON.stringify({ state: client.state })));
     
-  client.on('volume', () => 
-    ws.send(JSON.stringify({ volume: client.volume })));
+  // client.on('volume', () => 
+  //   ws.send(JSON.stringify({ volume: client.volume })));
   
   // Messages received via webSocket from our front end are handled here.
   ws.on('message', message => {
@@ -45,6 +69,7 @@ wss.on('connection', ws => {
   });
   
   ws.on('ping', () => ws.pong());
+  ws.on('pong', () => aliveSockets.add(ws));
 });
 
 console.log(`Server running.`);
