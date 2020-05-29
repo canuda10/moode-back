@@ -1,6 +1,13 @@
 import { EventEmitter } from 'events';
 import * as net from 'net';
 
+type state_t = 'play' | 'stop' | 'pause';
+function isState(value: string): value is state_t {
+  return value == 'play'
+    || value == 'stop'
+    || value == 'pause';
+}
+
 const defaultOptions: net.NetConnectOpts = {
   port: 6600,
 }
@@ -11,8 +18,12 @@ const OK_MPD = /^OK MPD /;
 export class MpdClient extends EventEmitter {
   private buffer = '';
   private socket: net.Socket;
-  private _volume = 0;
+  private _volume: number;
+  private _state: state_t;
 
+  get state(): state_t {
+    return this._state;
+  }
   get volume(): number {
     return this._volume;
   }
@@ -24,6 +35,9 @@ export class MpdClient extends EventEmitter {
     this.socket.on('data', data => this.onData(data));
     this.socket.on('close', hadError => this.onClose(hadError));
     this.socket.on('error', error => this.onError(error));
+
+    this._state = 'stop';
+    this._volume = 0;
   }
 
   private onConnect(): void {
@@ -74,10 +88,22 @@ export class MpdClient extends EventEmitter {
     lines.forEach(line => {
       const parts = line.split(':');
       const key = parts[0];
+      const val = parts[1] && parts[1].trim();
 
       switch (key) {
+        case 'state':
+          if (!isState(val)) {
+            console.error(`invalid state received: "${line}".`);
+            break;
+          }
+          if (val != this._state) {
+            this._state = val;
+            this.emit('state');
+          }
+          break;
+          
         case 'volume':
-          let vol = +parts[1];
+          let vol = +val;
           if (isNaN(vol)) {
             console.error(`invalid volume received: "${line}".`);
             break;
