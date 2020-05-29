@@ -136,6 +136,33 @@ export class MpdClient extends EventEmitter {
   // Pos: 0
   // Id: 29
   
+  // file: NAS/freenas2/Camel/Pressure Points/01 Pressure Points.m4a                                                             
+  // Last-Modified: 2016-11-29T17:54:21Z                                                                                          
+  // Artist: Camel                                                                                                               
+  // Album: Pressure Points                                                                                                       
+  // Title: Pressure Points                                                                                                      
+  // Track: 1                                                                                                                     
+  // Genre: Progressive Rock                                                                                                     
+  // Date: 1984-11                                                                                                                
+  // Comment: ExactAudioCopy v0.95b4                                                                                             
+  // Disc: 1                                                                                                                      
+  // Label: Decca                                                                                                                
+  // AlbumArtist: Camel                                                                                                           
+  // MUSICBRAINZ_ARTISTID: 94b7a39b-f3cc-4796-90dd-b1786a62877e                                                                  
+  // MUSICBRAINZ_ALBUMID: dbf5510c-261d-4fa0-8210-3743e142f10a                                                                    
+  // MUSICBRAINZ_ALBUMARTISTID: 94b7a39b-f3cc-4796-90dd-b1786a62877e                                                             
+  // MUSICBRAINZ_TRACKID: fd9c43c3-bf67-42a6-9878-5bbe2b76d1c0                                                                    
+  // Time: 438                                                                                                                   
+  // duration: 437.733                                                                                                            
+  // Pos: 0                                                                                                                      
+  // Id: 30                                                                                                                       
+  
+  // file: http://shoutcast.ccma.cat/ccma/catalunyaradioHD.mp3
+  // Title: Catalunya Ràdio
+  // Pos: 0
+  // Id: 40
+
+
   async idle(): Promise<void> {
     this.socket.write('idle\n');
   }
@@ -178,6 +205,42 @@ export class MpdClient extends EventEmitter {
   // elapsed: 94.598
   // bitrate: 128
   // audio: 44100:24:2
+  
+  // volume: 50                                                                                                                  
+  // repeat: 0                                                                                                                    
+  // random: 0                                                                                                                   
+  // single: 0                                                                                                                    
+  // consume: 0                                                                                                                  
+  // playlist: 87                                                                                                                 
+  // playlistlength: 10                                                                                                          
+  // mixrampdb: 0.000000                                                                                                          
+  // state: play                                                                                                                 
+  // song: 0                                                                                                                      
+  // songid: 30                                                                                                                  
+  // time: 0:438                                                                                                                  
+  // elapsed: 0.000                                                                                                              
+  // bitrate: 0                                                                                                                   
+  // duration: 437.733                                                                                                           
+  // audio: 44100:16:2                                                                                                            
+  // nextsong: 1                                                                                                                 
+  // nextsongid: 31                                                                                                               
+  
+  // volume: 50
+  // repeat: 0
+  // random: 0
+  // single: 0
+  // consume: 0
+  // playlist: 90
+  // playlistlength: 1
+  // mixrampdb: 0.000000
+  // state: play
+  // song: 0
+  // songid: 40
+  // time: 0:0
+  // elapsed: 0.034
+  // bitrate: 128
+  // audio: 44100:24:2
+
   
   async stop(): Promise<void> {
     this.socket.write('noidle\nstop\nidle\n');
