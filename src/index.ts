@@ -19,6 +19,8 @@ const wss = new WebSocket.Server({ port: 3000 });
 
 const aliveSockets = new Set<WebSocket>();
 
+// Keepalive. Every 30s, all clients which did not respond to the previous ping
+// will be terminated, and a ping will be sent to the rest of them.
 setInterval(() => {
   wss.clients.forEach(ws => {
     if (!aliveSockets.has(ws))
@@ -29,14 +31,23 @@ setInterval(() => {
   })
 }, 30 * 1000);
 
+client.on('currentsong', () =>
+  broadcast(JSON.stringify({ currentsong: client.currentSongInfo })));
 
-client.on('state', () => broadcast(JSON.stringify({ state: client.state })));
-client.on('volume', () => broadcast(JSON.stringify({ volume: client.volume })));
+client.on('status', () =>
+  broadcast(JSON.stringify({ status: client.statusInfo })));
+
+client.on('state', () => 
+  broadcast(JSON.stringify({ state: client.state })));
+
+client.on('volume', () => 
+  broadcast(JSON.stringify({ volume: client.volume })));
 
 wss.on('connection', ws => {
   aliveSockets.add(ws);
   ws.send(JSON.stringify({ state: client.state }));
   ws.send(JSON.stringify({ volume: client.volume }));
+  ws.send(JSON.stringify({ currentsong: client.currentSongInfo }));
 
   // client.on('state', () =>
   //   ws.send(JSON.stringify({ state: client.state })));

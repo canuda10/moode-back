@@ -8,6 +8,8 @@ function isState(value: string): value is state_t {
     || value == 'pause';
 }
 
+type data_t = { [key: string]: string };
+
 const defaultOptions: net.NetConnectOpts = {
   port: 6600,
 }
@@ -21,10 +23,21 @@ export class MpdClient extends EventEmitter {
   private _volume: number;
   private _state: state_t;
   private _songid: number;
+  private _currentSongInfo: data_t;
+  private _statusInfo: data_t;
+
+  get currentSongInfo(): data_t {
+    return this._currentSongInfo;
+  }
+
+  get statusInfo(): data_t {
+    return this._statusInfo;
+  }
 
   get state(): state_t {
     return this._state;
   }
+
   get volume(): number {
     return this._volume;
   }
@@ -37,9 +50,11 @@ export class MpdClient extends EventEmitter {
     this.socket.on('close', hadError => this.onClose(hadError));
     this.socket.on('error', error => this.onError(error));
 
-    this._state = 'stop';
-    this._volume = 0;
-    this._songid = 0;
+    this._currentSongInfo = {};
+    this._statusInfo      = {};
+    this._state           = 'stop';
+    this._volume          = 0;
+    this._songid          = 0;
   }
 
   private onConnect(): void {
@@ -60,6 +75,7 @@ export class MpdClient extends EventEmitter {
       if (OK_MPD.test(line)) {
         // connection successful.
         this.status();
+        this.currentsong();
       } else if (code == 'ACK') {
         // command failure received.
         console.log(`ack:\n ${str}`);
@@ -69,6 +85,7 @@ export class MpdClient extends EventEmitter {
         // If something has changed, do a status call to reload all info.
         if (msg.indexOf('changed:') == 0) {
           this.status();
+          this.currentsong();
         }
       }
       // this.idle();
@@ -88,10 +105,12 @@ export class MpdClient extends EventEmitter {
   private processMsg(msg: string): void {
     // console.log(msg);
     const lines = msg.split('\n');
+    const data: { [key: string]: string } = {};
     lines.forEach(line => {
       const idx = line.indexOf(':');
       const key = line.slice(0, idx);
       const val = line.slice(idx + 1).trim();
+      data[key] = val;
 
       switch (key) {
         case 'state':
@@ -117,15 +136,19 @@ export class MpdClient extends EventEmitter {
             this.emit('volume');
           }
           break;
-
-        case 'songid':
-          let id = +val;
-          if (id != this._songid) {
-            this._songid = id;
-            this.currentsong();
-          }
       }
     });
+    console.log(data);
+
+    if (data.Id != undefined) {
+      this._currentSongInfo = data;
+      this.emit('currentsong');
+    }
+
+    if (data.volume != undefined) {
+      this._statusInfo = data;
+      this.emit('status');
+    }
   }
 
   async currentsong(): Promise<void> {

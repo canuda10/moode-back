@@ -19,11 +19,11 @@
   },
   "homepage": "https://github.com/canuda10/moode-back#readme",
   "devDependencies": {
-    "@types/ws": "^7.2.4",
-    "typescript": "^3.9.3"
+    "@types/ws": "^7.4.1",
+    "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@types/node": "^14.0.5",
-    "ws": "^7.3.0"
+    "@types/node": "^14.14.37",
+    "ws": "^7.4.4"
   }
 }
